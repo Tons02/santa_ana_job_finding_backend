@@ -31,7 +31,6 @@ return new class extends Migration
             $table->string('salary_currency', 3)->default('PHP');
             $table->enum('salary_period', ['yearly', 'monthly', 'weekly', 'hourly','semi_monthly'])->default('semi_monthly')->nullable();
 
-            $table->string('status')->default('active');
             $table->enum('hiring_status', ['active', 'closed', 'paused'])->default('active')->nullable();
             $table->timestamp('posted_at')->useCurrent();
             $table->timestamp('expires_at')->nullable();
