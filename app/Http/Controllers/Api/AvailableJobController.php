@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AvailableJobRequest;
+use App\Http\Resources\AvailableJobResource;
 use App\Models\AvailableJob;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
@@ -15,13 +16,20 @@ class AvailableJobController extends Controller
     public function index(Request $request)
     {
         $status = $request->query('status');
+        $pagination = $request->query('pagination');
 
-        $Job = AvailableJob::when($status === "inactive", function ($query) {
+        $Job = AvailableJob::with('skills')->when($status === "inactive", function ($query) {
             $query->onlyTrashed();
         })
             ->orderBy('created_at', 'desc')
             ->useFilters()
             ->dynamicPaginate();
+
+        if (!$pagination) {
+            AvailableJobResource::collection($Job);
+        } else {
+            $Job = AvailableJobResource::collection($Job);
+        }
 
         return $this->responseSuccess('Jobs display successfully', $Job);
     }
@@ -45,11 +53,12 @@ class AvailableJobController extends Controller
             "expires_at" => $request->expires_at,
         ]);
 
+        // Use sync() instead of looping with attach()
         if ($request->filled('skills')) {
             $create_job->skills()->sync($request->skills);
         }
 
-        return $this->responseCreated('Skill Successfully Created', $create_job);
+        return $this->responseCreated('Job Successfully Created', $create_job);
     }
 
     public function update(AvailableJobRequest $request, $id)

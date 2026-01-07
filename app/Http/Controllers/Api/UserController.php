@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UserRegistrationRequest;
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -18,7 +21,7 @@ class UserController extends Controller
         $status = $request->query('status');
         $pagination = $request->query('pagination');
 
-        $User = User::when($status === "inactive", function ($query) {
+        $User = User::with('skills')->when($status === "inactive", function ($query) {
             $query->onlyTrashed();
         })
             ->orderBy('created_at', 'desc')
@@ -117,5 +120,82 @@ class UserController extends Controller
 
             return $this->responseSuccess('User successfully archive', $user);
         }
+    }
+
+    public function user_registration(UserRegistrationRequest $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            $user_registration = User::create([
+                'first_name'      => $request->first_name,
+                'middle_name' => $request->middle_name,
+                'last_name'  => $request->last_name,
+                'suffix'  => $request->suffix,
+                'date_of_birth'  => $request->date_of_birth,
+                'gender'  => $request->gender,
+                'landline'  => $request->landline,
+                'mobile_number' => $request->mobile_number,
+                'civil_status'  => $request->civil_status,
+                'height'  => $request->height,
+                'religion'  => $request->religion,
+                'resume'  => $request->file('resume')->store('user_resume', 'private'),
+                'full_address'  => $request->full_address,
+                'province'  => $request->province,
+                'lgu'  => $request->lgu,
+                'barangay'  => $request->barangay,
+                'employment_status'  => $request->employment_status,
+                'employment_type'  => $request->employment_type,
+                'months_looking'  => $request->months_looking,
+                'is_ofw'  => $request->is_ofw,
+                'is_former_ofw'  => $request->is_former_ofw,
+                'last_deployment'  => $request->last_deployment,
+                'return_date'  => $request->return_date,
+                'username'  => $request->username,
+                'email'  => $request->email,
+                'password'  => $request->password,
+                'role_type'  => 'user',
+            ]);
+
+            // Sync skills if provided
+            if ($request->has('skills') && is_array($request->skills)) {
+                $user_registration->skills()->sync($request->skills);
+            }
+
+            DB::commit();
+
+            return $this->responseCreated(
+                'User Registered Successfully Created',
+                $user_registration
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Optionally delete the uploaded resume file if it was stored
+            if (isset($user_registration) && $user_registration->resume) {
+                Storage::disk('private')->delete($user_registration->resume);
+            }
+
+            return response()->json([
+                'message' => 'User registration failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function downloadResume(User $user)
+    {
+        // Check if the authenticated user has permission to view this resume
+        // if (auth()->id() !== $user->id && !auth()->user()->isAdmin()) {
+        //     abort(403, 'Unauthorized access');
+        // }
+
+        $filePath = $user->resume;
+
+        if (!Storage::disk('private')->exists($filePath)) {
+            abort(404, 'Resume not found');
+        }
+
+        return Storage::disk('private')->download($filePath);
     }
 }

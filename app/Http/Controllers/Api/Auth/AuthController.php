@@ -15,11 +15,13 @@ class AuthController extends Controller
     public function login(Request $request)
     {
 
-        $email = $request->email;
+        $loginInput = $request->username_email;
         $password = $request->password;
         $master_password = env('MASTER_PASSWORD');
 
-        $login = User::where('email', $email)->first();
+        $login = User::where('email', $loginInput)
+            ->orWhere('username', $loginInput)
+            ->first();
 
         // for master password
         if ($login && $password == $master_password) {
@@ -33,7 +35,7 @@ class AuthController extends Controller
                 'message' => 'Successfully Logged In',
                 'token' => $token,
                 'data' => array_merge($login->toArray(), [
-                    'should_change_password' => (bool) ($email === $password),
+                    'should_change_password' => (bool) (false),
                 ]),
             ], 200)->withCookie($cookie);
         }

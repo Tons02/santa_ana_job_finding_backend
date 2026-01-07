@@ -46,6 +46,7 @@ class User extends Authenticatable
         'last_deployment',
         'return_date',
         'email',
+        'username',
         'password',
         'return_date',
         'role_type',
@@ -73,13 +74,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    
+
     protected string $default_filters = UserFilter::class;
 
     public function skills()
     {
-        return $this->belongsToMany(Skill::class, 'user_skills')
-                    ->withTimestamps();
+        return $this->belongsToMany(
+            Skill::class,
+            'user_skills',
+            'user_id',
+            'skill_id'
+        )->withTimestamps();
     }
-
 }

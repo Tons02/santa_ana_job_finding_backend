@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UserRequest extends FormRequest
+class UserRegistrationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -30,11 +30,11 @@ class UserRequest extends FormRequest
 
             'date_of_birth' => ['required', 'date'],
             'gender' => ['required', Rule::in(['male', 'female'])],
-
             'landline' => ['nullable', 'string', 'max:50'],
             'civil_status' => ['required', Rule::in(['single', 'married', 'widowed', 'separated'])],
             'height' => ['nullable', 'numeric', 'min:50', 'max:300'],
             'religion' => ['nullable', 'string', 'max:255'],
+            'resume' => ['file', 'mimes:pdf,doc,docx', 'max:2048', 'required'],
 
             'full_address' => ['required', 'string'],
             'province' => ['required', 'string', 'max:255'],
@@ -47,6 +47,7 @@ class UserRequest extends FormRequest
             ],
 
             'employment_type' => [
+                'nullable',
                 'required_if:role_type,user',
                 Rule::in(['full_time', 'part_time', 'contract', 'internship']),
             ],
@@ -60,11 +61,13 @@ class UserRequest extends FormRequest
             ],
 
             'is_ofw' => [
+                'nullable',
                 'required_if:role_type,user',
                 'boolean',
             ],
 
             'is_former_ofw' => [
+                'nullable',
                 'required_if:role_type,user',
                 'boolean',
             ],
@@ -83,9 +86,7 @@ class UserRequest extends FormRequest
             'email' => ['required', 'email', $this->route()->user
                 ? "unique:users,email," . $this->route()->user
                 : "unique:users,email",],
-            'password' => ['sometimes', 'required', 'string', 'min:8'],
-
-            'role_type' => ['required', Rule::in(['admin'])],
+            'password' => ['sometimes', 'required', 'string', 'min:4'],
 
             // Skills (optional)
             'skills' => ['nullable', 'array'],

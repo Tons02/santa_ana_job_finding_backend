@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SkillRequest;
+use App\Http\Resources\SkillResource;
 use App\Models\Skill;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ class SkillController extends Controller
     public function index(Request $request)
     {
         $status = $request->query('status');
+        $pagination = $request->query('pagination');
 
         $Skill = Skill::when($status === "inactive", function ($query) {
             $query->onlyTrashed();
@@ -22,6 +24,12 @@ class SkillController extends Controller
             ->orderBy('created_at', 'desc')
             ->useFilters()
             ->dynamicPaginate();
+
+        if (!$pagination) {
+            SkillResource::collection($Skill);
+        } else {
+            $Skill = SkillResource::collection($Skill);
+        }
 
         return $this->responseSuccess('Skills display successfully', $Skill);
     }

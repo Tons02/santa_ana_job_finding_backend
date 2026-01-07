@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('job_id')
-                ->constrained()
+                ->constrained('available_jobs')
                 ->cascadeOnDelete();
             $table->foreignId('skill_id')
                 ->constrained()
@@ -24,7 +24,6 @@ return new class extends Migration
 
             $table->unique(['job_id', 'skill_id']);
         });
-
     }
 
     /**

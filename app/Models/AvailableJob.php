@@ -30,11 +30,14 @@ class AvailableJob extends Model
     ];
 
     protected string $default_filters = AvailableJobFilter::class;
-    
+
     public function skills()
     {
-        return $this->belongsToMany(Skill::class, 'job_skills')
-                    ->withTimestamps();
+        return $this->belongsToMany(
+            Skill::class,
+            'job_skills',
+            'job_id',
+            'skill_id'
+        )->withTimestamps();
     }
-
 }
