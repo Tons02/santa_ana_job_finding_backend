@@ -55,8 +55,8 @@ class UserController extends Controller
             'lgu'  => $request->lgu,
             'barangay'  => $request->barangay,
             'email'  => $request->email,
-            'password'  => $request->password,
-            'role_type'  => $request->role_type,
+            'password'  => $request->email,
+            'role_type'  => 'admin',
         ]);
 
         return $this->responseCreated(
@@ -90,7 +90,7 @@ class UserController extends Controller
             'lgu'  => $request->lgu,
             'barangay'  => $request->barangay,
             'email'  => $request->email,
-            'role_type'  => $request->role_type,
+            // 'role_type'  => $request->role_type,
         ]);
 
         return $this->responseCreated(
@@ -139,7 +139,7 @@ class UserController extends Controller
                 'civil_status'  => $request->civil_status,
                 'height'  => $request->height,
                 'religion'  => $request->religion,
-                'resume'  => $request->file('resume')->store('user_resume', 'private'),
+                'resume'  => $request->file('resume')->store('applicant_resume', 'private'),
                 'full_address'  => $request->full_address,
                 'province'  => $request->province,
                 'lgu'  => $request->lgu,
@@ -157,17 +157,20 @@ class UserController extends Controller
                 'role_type'  => 'user',
             ]);
 
-            // Sync skills if provided
-            if ($request->has('skills') && is_array($request->skills)) {
-                $user_registration->skills()->sync($request->skills);
-            }
+            // Generate token for auto-login
+            $permissions = [$user_registration->role_type];
+            $token = $user_registration->createToken($user_registration->role_type, $permissions)->plainTextToken;
+
+            // Create auth cookie
+            $cookie = cookie('authcookie', $token);
 
             DB::commit();
 
-            return $this->responseCreated(
-                'User Registered Successfully Created',
-                $user_registration
-            );
+            return response()->json([
+                'message' => 'User Registered Successfully',
+                'token' => $token,
+                'data' => $user_registration
+            ], 201)->withCookie($cookie);
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -183,19 +186,18 @@ class UserController extends Controller
         }
     }
 
-    public function downloadResume(User $user)
+    // ✅ This displays in browser
+    public function viewResume(User $user)
     {
-        // Check if the authenticated user has permission to view this resume
-        // if (auth()->id() !== $user->id && !auth()->user()->isAdmin()) {
-        //     abort(403, 'Unauthorized access');
-        // }
+        $path = Storage::disk('private')->path($user->resume);
 
-        $filePath = $user->resume;
-
-        if (!Storage::disk('private')->exists($filePath)) {
+        if (!file_exists($path)) {
             abort(404, 'Resume not found');
         }
 
-        return Storage::disk('private')->download($filePath);
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . basename($user->resume) . '"'
+        ]);
     }
 }

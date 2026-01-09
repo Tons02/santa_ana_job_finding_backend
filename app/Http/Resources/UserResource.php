@@ -26,7 +26,7 @@ class UserResource extends JsonResource
             'civil_status' => $this->civil_status,
             'height' => $this->height,
             'religion' => $this->religion,
-            'resume' => $this->resume,
+            'resume' => 'applicant-resume/' . ($this->resume ? $this->id : null),
             'full_address' => $this->full_address,
             'province' => $this->province,
             'lgu' => $this->lgu,

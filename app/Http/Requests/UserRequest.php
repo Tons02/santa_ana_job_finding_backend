@@ -79,10 +79,22 @@ class UserRequest extends FormRequest
                 'nullable',
                 'date',
             ],
-
-            'email' => ['required', 'email', $this->route()->user
-                ? "unique:users,email," . $this->route()->user
-                : "unique:users,email",],
+            'username' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-zA-Z0-9_]+$/', // Optional: alphanumeric and underscore only
+                $this->route()->user
+                    ? "unique:users,username," . $this->route()->user
+                    : "unique:users,username"
+            ],
+            'email' => [
+                'required',
+                'email',
+                $this->route()->user
+                    ? "unique:users,email," . $this->route()->user
+                    : "unique:users,email"
+            ],
             'password' => ['sometimes', 'required', 'string', 'min:8'],
 
             'role_type' => ['required', Rule::in(['admin'])],

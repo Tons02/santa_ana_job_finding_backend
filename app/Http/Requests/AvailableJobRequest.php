@@ -26,8 +26,8 @@ class AvailableJobRequest extends FormRequest
             "title" => [
                 "required",
                 "string",
-                $this->route()->skill
-                    ? "unique:available_jobs,title," . $this->route()->skill
+                $this->route()->job
+                    ? "unique:available_jobs,title," . $this->route()->job
                     : "unique:available_jobs,title",
             ],
             'description' => ['required', 'string', 'max:255'],
@@ -43,10 +43,10 @@ class AvailableJobRequest extends FormRequest
                 Rule::in(['PHP', 'USD']),
             ],
             'salary_period' => [
-                Rule::in(['yearly','monthly','weekly','hourly','semi_monthly']),
+                Rule::in(['yearly', 'monthly', 'weekly', 'hourly', 'semi_monthly']),
             ],
             'hiring_status' => [
-                Rule::in(['active','closed','paused']),
+                Rule::in(['active', 'closed', 'paused']),
             ],
             'posted_at' => [
                 'date'

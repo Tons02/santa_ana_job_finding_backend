@@ -34,10 +34,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('job-archived/{id}', [AvailableJobController::class, 'archived']);
     Route::resource("job", AvailableJobController::class);
 
-    // // Job Application Controller
-    // Route::put('job-application-archived/{id}', [JobApplicationController::class, 'archived']);
-    // Route::patch('job-application-view/{id}', [JobApplicationController::class, 'job_application_view']);
-    // Route::resource("job-application", JobApplicationController::class);
+    // Job Application Controller
+    Route::put('job-application-archived/{id}', [JobApplicationController::class, 'archived']);
+    Route::patch('job-application-view/{id}', [JobApplicationController::class, 'job_application_view']);
+    Route::resource("job-application", JobApplicationController::class);
 
-    // Route::get('/download-resume/{user}', [UserController::class, 'downloadResume']);
+    // routes/api.php
+    Route::get('/applicant-resume/{user}', [UserController::class, 'viewResume']);
 });
