@@ -8,6 +8,7 @@ use App\Models\User;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -42,7 +43,7 @@ class AuthController extends Controller
         }
 
 
-        if (!$login || !hash::check($password, $login->password)) {
+        if (!$login || !Hash::check($password, $login->password)) {
             return $this->responseBadRequest('', 'Invalid Credentials');
         }
 

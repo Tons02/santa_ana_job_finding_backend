@@ -11,7 +11,14 @@ class SkillRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        // Get the authenticated user
+        $authUser = auth()->user();
+
+        if (!$authUser) {
+            return false;
+        }
+
+        return $authUser->role_type === 'admin';
     }
 
     /**

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('user-registration', [UserController::class, 'user_registration'])->name('user-registration');
+Route::get("skill", [SkillController::class, 'index']);
 
 
 
@@ -19,6 +20,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // User Controller
     Route::get('applicant-resume/{user}', [UserController::class, 'viewResume']);
     Route::post('update-user/{user}', [UserController::class, 'update_user']);
+    Route::post('update-resume/{user}', [UserController::class, 'update_resume']);
     Route::put('user-archived/{id}', [UserController::class, 'archived']);
     Route::resource("user", UserController::class);
 
@@ -30,7 +32,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Skill Controller
     Route::put('skill-archived/{id}', [SkillController::class, 'archived']);
-    Route::resource("skill", SkillController::class);
+    Route::post("skill", [SkillController::class, 'store']);
+    Route::patch("skill/{id}", [SkillController::class, 'update']);
 
     // Job Controller
     Route::put('job-archived/{id}', [AvailableJobController::class, 'archived']);

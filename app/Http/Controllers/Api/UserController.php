@@ -8,6 +8,7 @@ use App\Http\Requests\UserRegistrationRequest;
 use App\Http\Requests\UserRequest;
 use App\Http\Requests\UserSingleGetDisplayRequest;
 use App\Http\Requests\UserUpdateRequest;
+use App\Http\Requests\UserUpdateResumeRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Essa\APIToolKit\Api\ApiResponse;
@@ -209,7 +210,6 @@ class UserController extends Controller
         DB::beginTransaction();
 
         try {
-            // Only update fields that are present in the request
             $updateData = $request->only([
                 'first_name',
                 'middle_name',
@@ -272,6 +272,22 @@ class UserController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function update_resume(UserUpdateResumeRequest $request, User $user)
+    {
+
+        if ($user->resume) {
+            Storage::disk('private')->delete($user->resume);
+        }
+
+        // Store new resume
+        $path = $request->file('resume')->store('applicant_resume', 'private');
+
+        // Update user record
+        $user->update(['resume' => $path]);
+
+        return $this->responseSuccess('Resume updated successfully', $user);
     }
 
     // ✅ This displays in browser

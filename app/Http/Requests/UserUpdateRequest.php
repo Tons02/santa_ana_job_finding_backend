@@ -106,6 +106,7 @@ class UserUpdateRequest extends FormRequest
             'resume.max' => 'Resume must not exceed 2MB',
             'date_of_birth.before_or_equal' => 'You must be at least 15 years old.',
             'skills.*.exists' => 'Selected skill is invalid.',
+            'is_ofw.boolean' => 'Invalid value for OFW status.',
         ];
     }
 }

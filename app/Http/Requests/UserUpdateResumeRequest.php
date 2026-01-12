@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class JobApplicationSingleGetDisplayRequest extends FormRequest
+class UserUpdateResumeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,14 +13,13 @@ class JobApplicationSingleGetDisplayRequest extends FormRequest
     {
         // Get the authenticated user
         $authUser = auth()->user();
-        $jobApplication = $this->route('job_application');
+        $user = $this->route('user');
 
         if (!$authUser) {
             return false;
         }
 
-        return $authUser->id === $jobApplication->user_id
-            || $authUser->role_type === 'admin';
+        return $authUser->id === $user->id;
     }
 
     /**
@@ -31,11 +30,7 @@ class JobApplicationSingleGetDisplayRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'resume' => 'required|file|mimes:pdf|max:2048',
         ];
     }
-
-    /**
-     * Get the validation error message when authorization fails.
-     */
 }
