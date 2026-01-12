@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\JobApplicationDisplayRequest;
 use App\Http\Requests\JobApplicationRequest;
+use App\Http\Requests\JobApplicationSingleGetDisplayRequest;
 use App\Http\Resources\JobApplicationResource;
 use App\Models\JobApplication;
 use Essa\APIToolKit\Api\ApiResponse;
@@ -13,7 +15,7 @@ class JobApplicationController extends Controller
 {
     use ApiResponse;
 
-    public function index(Request $request)
+    public function index(JobApplicationDisplayRequest $request)
     {
         $status = $request->query('status');
         $pagination = $request->query('pagination');
@@ -33,6 +35,17 @@ class JobApplicationController extends Controller
         }
 
         return $this->responseSuccess('Job Applications display successfully', $JobApplications);
+    }
+
+    public function show(JobApplicationSingleGetDisplayRequest $request, JobApplication $jobApplication)
+    {
+        $job_application = JobApplication::with('job', 'user.skills')->where('id', $jobApplication->id)->first();
+
+        if (!$job_application) {
+            return $this->responseNotFound('', 'Invalid ID provided. Please check the ID and try again.');
+        }
+
+        return $this->responseSuccess('Job Application retrieved successfully', new JobApplicationResource($job_application));
     }
 
     public function store(JobApplicationRequest $request)

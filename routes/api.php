@@ -17,6 +17,8 @@ Route::post('user-registration', [UserController::class, 'user_registration'])->
 
 Route::middleware(['auth:sanctum'])->group(function () {
     // User Controller
+    Route::get('applicant-resume/{user}', [UserController::class, 'viewResume']);
+    Route::post('update-user/{user}', [UserController::class, 'update_user']);
     Route::put('user-archived/{id}', [UserController::class, 'archived']);
     Route::resource("user", UserController::class);
 
@@ -38,7 +40,4 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('job-application-archived/{id}', [JobApplicationController::class, 'archived']);
     Route::patch('job-application-view/{id}', [JobApplicationController::class, 'job_application_view']);
     Route::resource("job-application", JobApplicationController::class);
-
-    // routes/api.php
-    Route::get('/applicant-resume/{user}', [UserController::class, 'viewResume']);
 });

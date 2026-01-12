@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UserGetDisplayRequest;
 use App\Http\Requests\UserRegistrationRequest;
 use App\Http\Requests\UserRequest;
+use App\Http\Requests\UserSingleGetDisplayRequest;
+use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Essa\APIToolKit\Api\ApiResponse;
@@ -16,7 +19,7 @@ class UserController extends Controller
 {
     use ApiResponse;
 
-    public function index(Request $request)
+    public function index(UserGetDisplayRequest $request)
     {
         $status = $request->query('status');
         $pagination = $request->query('pagination');
@@ -34,6 +37,13 @@ class UserController extends Controller
             $User = UserResource::collection($User);
         }
         return $this->responseSuccess('User display successfully', $User);
+    }
+
+    public function show(UserSingleGetDisplayRequest $request, User $user)
+    {
+        $user = User::with('skills')->where('id', $user->id)->first();
+
+        return $this->responseSuccess('User retrieved successfully', new UserResource($user));
     }
 
     public function store(UserRequest $request)
@@ -157,6 +167,11 @@ class UserController extends Controller
                 'role_type'  => 'user',
             ]);
 
+            // Sync skills if provided
+            if ($request->has('skills') && is_array($request->skills)) {
+                $user_registration->skills()->sync($request->skills);
+            }
+
             // Generate token for auto-login
             $permissions = [$user_registration->role_type];
             $token = $user_registration->createToken($user_registration->role_type, $permissions)->plainTextToken;
@@ -165,6 +180,9 @@ class UserController extends Controller
             $cookie = cookie('authcookie', $token);
 
             DB::commit();
+
+            // Load skills relationship for response
+            $user_registration->load('skills');
 
             return response()->json([
                 'message' => 'User Registered Successfully',
@@ -181,6 +199,76 @@ class UserController extends Controller
 
             return response()->json([
                 'message' => 'User registration failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function update_user(UserUpdateRequest $request, User $user)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Only update fields that are present in the request
+            $updateData = $request->only([
+                'first_name',
+                'middle_name',
+                'last_name',
+                'suffix',
+                'date_of_birth',
+                'gender',
+                'landline',
+                'mobile_number',
+                'civil_status',
+                'height',
+                'religion',
+                'full_address',
+                'province',
+                'lgu',
+                'barangay',
+                'employment_status',
+                'employment_type',
+                'months_looking',
+                'is_ofw',
+                'is_former_ofw',
+                'last_deployment',
+                'return_date',
+            ]);
+
+            // Handle resume upload if provided
+            if ($request->hasFile('resume')) {
+                if ($user->resume) {
+                    Storage::disk('private')->delete($user->resume);
+                }
+                $updateData['resume'] = $request->file('resume')->store('applicant_resume', 'private');
+            }
+
+            // Update user basic information
+            $user->update($updateData);
+
+            // Sync skills if provided
+            if ($request->has('skills') && is_array($request->skills)) {
+                $user->skills()->sync($request->skills);
+            }
+
+            DB::commit();
+
+            // Load skills relationship for response
+            $user->load('skills');
+
+            return response()->json([
+                'message' => 'User information updated successfully',
+                'data' => $user->fresh(['skills'])
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if (isset($updateData['resume'])) {
+                Storage::disk('private')->delete($updateData['resume']);
+            }
+
+            return response()->json([
+                'message' => 'User update failed',
                 'error' => $e->getMessage()
             ], 500);
         }

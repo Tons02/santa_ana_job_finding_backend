@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ChangePasswordRequest;
 use App\Models\User;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
@@ -64,41 +65,6 @@ class AuthController extends Controller
         return $this->responseSuccess('Logout successfully');
     }
 
-    public function registration(RegistrationRequest $request)
-    {
-
-        $create_user = User::create([
-            "profile_picture" => "default_profile.jpg",
-            "fname" => $request["fname"],
-            "mi" => $request["mi"],
-            "lname" => $request["lname"],
-            "suffix" => $request["suffix"],
-            "gender" => $request["gender"],
-            "mobile_number" => $request["mobile_number"],
-            "birthday" => $request["birthday"],
-            "address" => $request["address"],
-            "username" => $request["username"],
-            "email" => $request["email"],
-            "password" => $request["password"],
-            "role_type" => "customer",
-        ]);
-
-        // Dispatch email verification
-        event(new Registered($create_user));
-
-        $permissions = [$create_user->role_type];
-        $token = $create_user->createToken($create_user->role_type, $permissions)->plainTextToken;
-
-
-        $cookie = cookie('authcookie', $token);
-
-        return response()->json([
-            'message' => 'Registration successful. Please check your email to verify your account.',
-            'token' => $token,
-            'data' => $create_user
-        ], 200)->withCookie($cookie);
-    }
-
     public function resetPassword(Request $request, $id)
     {
         $user = User::where('id', $id)->first();
@@ -114,21 +80,6 @@ class AuthController extends Controller
         return $this->responseSuccess('The Password has been reset');
     }
 
-    public function changeEmail(ChangeEmailRequest $request, $id)
-    {
-        $user = User::where('id', $id)->first();
-
-        if (!$user) {
-            return $this->responseUnprocessable('', 'Invalid ID provided for updating email. Please check the ID and try again.');
-        }
-
-        $user->update([
-            'email' => $request->email,
-        ]);
-
-        return $this->responseSuccess('Change email successfully', $user);
-    }
-
     public function changedPassword(ChangePasswordRequest $request)
     {
         $user = auth('sanctum')->user();
@@ -138,12 +89,7 @@ class AuthController extends Controller
         }
 
         $user->update([
-            'password' => Hash::make($request->new_password),
-        ]);
-
-        ActivityLog::create([
-            'action' => 'Change Password',
-            'user_id' => auth()->user()->id,
+            'password' => $request->new_password,
         ]);
 
         return $this->responseSuccess('Password change successfully');

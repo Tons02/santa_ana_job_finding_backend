@@ -36,6 +36,17 @@ class AvailableJobController extends Controller
         return $this->responseSuccess('Jobs display successfully', $Job);
     }
 
+    public function show($id)
+    {
+        $job = AvailableJob::with('skills')->find($id);
+
+        if (!$job) {
+            return $this->responseNotFound('', 'Invalid ID provided. Please check the ID and try again.');
+        }
+
+        return $this->responseSuccess('Job display successfully', new AvailableJobResource($job));
+    }
+
     public function store(AvailableJobRequest $request)
     {
         $today = Carbon::today();
