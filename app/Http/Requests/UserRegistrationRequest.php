@@ -35,6 +35,15 @@ class UserRegistrationRequest extends FormRequest
             ],
             'gender' => ['required', Rule::in(['male', 'female'])],
             'landline' => ['nullable', 'string', 'max:50'],
+            'mobile_number' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^\+63\d{10}$/',
+                $this->route()->user
+                    ? "unique:users,mobile_number," . $this->route()->user
+                    : "unique:users,mobile_number"
+            ],
             'civil_status' => ['required', Rule::in(['single', 'married', 'widowed', 'separated'])],
             'height' => ['nullable', 'numeric', 'min:50', 'max:300'],
             'religion' => ['nullable', 'string', 'max:255'],
