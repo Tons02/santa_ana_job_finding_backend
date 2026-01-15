@@ -7,6 +7,7 @@ use App\Http\Requests\JobApplicationDisplayRequest;
 use App\Http\Requests\JobApplicationRequest;
 use App\Http\Requests\JobApplicationSingleGetDisplayRequest;
 use App\Http\Resources\JobApplicationResource;
+use App\Models\AvailableJob;
 use App\Models\JobApplication;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
@@ -52,6 +53,13 @@ class JobApplicationController extends Controller
     {
         if (!auth()->user()->resume) {
             return $this->responseNotFound('', 'Please upload your resume before applying for jobs.');
+        }
+
+        $job = AvailableJob::where('id', $request->job_id)
+            ->first();
+
+        if ($job->hiring_status !== 'active') {
+            return $this->responseNotFound('', 'Cannot apply to this job as it is not currently hiring.');
         }
 
         $create_job_application = JobApplication::create([

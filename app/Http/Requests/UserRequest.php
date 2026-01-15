@@ -97,9 +97,7 @@ class UserRequest extends FormRequest
                     ? "unique:users,email," . $this->route()->user
                     : "unique:users,email"
             ],
-            'password' => ['sometimes', 'required', 'string', 'min:8'],
-
-            'role_type' => ['required', Rule::in(['admin'])],
+            'password' => ['sometimes', 'required', 'string', 'min:6'],
 
             // Skills (optional)
             'skills' => ['nullable', 'array'],

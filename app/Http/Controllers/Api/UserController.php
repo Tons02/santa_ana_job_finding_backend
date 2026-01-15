@@ -65,13 +65,14 @@ class UserController extends Controller
             'province'  => $request->province,
             'lgu'  => $request->lgu,
             'barangay'  => $request->barangay,
+            'username'  => $request->username,
             'email'  => $request->email,
-            'password'  => $request->email,
+            'password'  => $request->password,
             'role_type'  => 'admin',
         ]);
 
         return $this->responseCreated(
-            'User Successfully Created',
+            'Admin Successfully Created',
             $user
         );
     }
@@ -82,6 +83,12 @@ class UserController extends Controller
 
         if (!$user) {
             return $this->responseNotFound('', 'Invalid ID provided for updating. Please check the ID and try again.');
+        }
+
+        if ($request->filled('password')) {
+            $user->update([
+                'password' => $request->password,
+            ]);
         }
 
         $user->update([
@@ -100,12 +107,12 @@ class UserController extends Controller
             'province'  => $request->province,
             'lgu'  => $request->lgu,
             'barangay'  => $request->barangay,
+            'username'  => $request->username,
             'email'  => $request->email,
-            // 'role_type'  => $request->role_type,
         ]);
 
         return $this->responseCreated(
-            'User Successfully Updated',
+            'Admin Successfully Updated',
             $user
         );
     }
