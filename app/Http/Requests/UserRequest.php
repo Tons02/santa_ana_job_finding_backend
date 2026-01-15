@@ -27,8 +27,11 @@ class UserRequest extends FormRequest
             'middle_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'suffix' => ['nullable', 'string', 'max:50'],
-
-            'date_of_birth' => ['required', 'date'],
+            'date_of_birth' => [
+                'required',
+                'date',
+                'before_or_equal:' . now()->subYears(18)->toDateString(),
+            ],
             'gender' => ['required', Rule::in(['male', 'female'])],
 
             'landline' => ['nullable', 'string', 'max:50'],
@@ -40,7 +43,6 @@ class UserRequest extends FormRequest
             'province' => ['required', 'string', 'max:255'],
             'lgu' => ['required', 'string', 'max:255'],
             'barangay' => ['required', 'string', 'max:255'],
-
             'employment_status' => [
                 'required_if:role_type,user',
                 Rule::in(['employed', 'unemployed']),
