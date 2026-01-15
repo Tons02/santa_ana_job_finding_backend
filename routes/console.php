@@ -5,5 +5,5 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
 Schedule::command('jobs:update-hiring-status')
-    ->everyMinute()
+    ->everyFifteenSeconds()
     ->withoutOverlapping();

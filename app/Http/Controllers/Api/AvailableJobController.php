@@ -49,11 +49,14 @@ class AvailableJobController extends Controller
 
     public function store(AvailableJobRequest $request)
     {
-        $today = Carbon::today();
-        $posted = Carbon::parse($request->posted_at);
-        $expires = Carbon::parse($request->expires_at);
 
-        $status = ($today->between($posted, $expires)) ? 'active' : 'closed';
+        $now = Carbon::now();
+        $posted  = Carbon::createFromFormat('Y-m-d H:i:s', $request->posted_at);
+        $expires = Carbon::createFromFormat('Y-m-d H:i:s', $request->expires_at);
+
+        $status = ($now->between($posted, $expires))
+            ? 'active'
+            : 'closed';
 
         $create_job = AvailableJob::create([
             "title" => $request->title,
@@ -87,12 +90,13 @@ class AvailableJobController extends Controller
             return $this->responseNotFound('', 'Invalid ID provided for updating. Please check the ID and try again.');
         }
 
-        // Determine status based on dates
-        $today = Carbon::today();
-        $posted = Carbon::parse($request->posted_at);
-        $expires = Carbon::parse($request->expires_at);
+        $now = Carbon::now();
+        $posted  = Carbon::createFromFormat('Y-m-d H:i:s', $request->posted_at);
+        $expires = Carbon::createFromFormat('Y-m-d H:i:s', $request->expires_at);
 
-        $hiring_status = ($today->between($posted, $expires)) ? 'active' : 'closed';
+        $hiring_status = ($now->between($posted, $expires))
+            ? 'active'
+            : 'closed';
 
         $job->fill([
             'title' => $request->title,
