@@ -31,9 +31,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('resetpassword/{id}', [AuthController::class, 'resetPassword']);
 
     // Skill Controller
-    Route::put('skill-archived/{id}', [SkillController::class, 'archived']);
+    Route::put('skill-archived/{skill}', [SkillController::class, 'archived']);
     Route::post("skill", [SkillController::class, 'store']);
-    Route::patch("skill/{id}", [SkillController::class, 'update']);
+    Route::patch("skill/{skill}", [SkillController::class, 'update']);
 
     // Job Controller
     Route::put('job-archived/{id}', [AvailableJobController::class, 'archived']);
