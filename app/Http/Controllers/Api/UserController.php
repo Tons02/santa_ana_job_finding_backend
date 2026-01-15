@@ -85,12 +85,6 @@ class UserController extends Controller
             return $this->responseNotFound('', 'Invalid ID provided for updating. Please check the ID and try again.');
         }
 
-        if ($request->filled('password')) {
-            $user->update([
-                'password' => $request->password,
-            ]);
-        }
-
         $user->update([
             'first_name'      => $request->first_name,
             'middle_name' => $request->middle_name,
