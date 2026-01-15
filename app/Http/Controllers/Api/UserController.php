@@ -115,6 +115,10 @@ class UserController extends Controller
     {
         $user = User::withTrashed()->find($id);
 
+        if ($id == auth('sanctum')->user()->id) {
+            return $this->responseUnprocessable('', 'Unable to archive. You cannot archive your own account.');
+        }
+
         if (!$user) {
             return $this->responseUnprocessable('', 'Invalid id please check the id and try again.');
         }
