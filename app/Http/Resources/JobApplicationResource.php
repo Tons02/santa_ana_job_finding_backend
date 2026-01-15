@@ -23,6 +23,7 @@ class JobApplicationResource extends JsonResource
             'applied_at' => $this->applied_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'deleted_at' => $this->deleted_at
         ];
     }
 }
