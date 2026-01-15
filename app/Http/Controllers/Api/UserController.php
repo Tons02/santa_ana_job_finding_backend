@@ -67,7 +67,7 @@ class UserController extends Controller
             'barangay'  => $request->barangay,
             'username'  => $request->username,
             'email'  => $request->email,
-            'password'  => $request->password,
+            'password'  => $request->username,
             'role_type'  => 'admin',
         ]);
 
