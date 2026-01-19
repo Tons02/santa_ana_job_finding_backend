@@ -39,48 +39,12 @@ class UserRequest extends FormRequest
             'height' => ['nullable', 'numeric', 'min:50', 'max:300'],
             'religion' => ['nullable', 'string', 'max:255'],
 
-            'full_address' => ['required', 'string'],
-            'province' => ['required', 'string', 'max:255'],
-            'lgu' => ['required', 'string', 'max:255'],
-            'barangay' => ['required', 'string', 'max:255'],
-            'employment_status' => [
-                'required_if:role_type,user',
-                Rule::in(['employed', 'unemployed']),
-            ],
+            'region' => ['required', 'string', Rule::in(['REGION 3 (CENTRAL LUZON)'])],
+            'province' => ['required', 'string', Rule::in(['PAMPANGA'])],
+            'city_municipality' => ['required', 'string', Rule::in(['SANTA ANA, PAMPANGA'])],
+            'barangay' => ['required', 'string', 'max:100'],
+            'street_address' => ['required', 'string', 'max:255'],
 
-            'employment_type' => [
-                'required_if:role_type,user',
-                Rule::in(['full_time', 'part_time', 'contract', 'internship']),
-            ],
-
-            'months_looking' => [
-                'required_if:role_type,user',
-                'nullable',
-                'integer',
-                'min:0',
-                'max:60',
-            ],
-
-            'is_ofw' => [
-                'required_if:role_type,user',
-                'boolean',
-            ],
-
-            'is_former_ofw' => [
-                'required_if:role_type,user',
-                'boolean',
-            ],
-
-            'last_deployment' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-
-            'return_date' => [
-                'nullable',
-                'date',
-            ],
             'username' => [
                 'required',
                 'string',

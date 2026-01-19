@@ -35,20 +35,24 @@ return new class extends Migration
             $table->enum('employment_status', ['employed', 'unemployed'])->nullable();
             $table->enum('employment_type', ['wage', 'unemployed', 'self_employed', 'full_time', 'freelance', 'contract', 'internship'])->default('Unemployed')->nullable();
             $table->integer('months_looking')->nullable();
-            $table->boolean('is_ofw')->nullable();
-            $table->string('education_level')->nullable();
-            $table->string('course')->nullable();
             $table->boolean('is_4ps')->nullable();
             $table->boolean('is_pwd')->nullable();
             $table->text('disability')->nullable();
-            $table->string('work_experience')->nullable();
             $table->boolean('is_ofw')->nullable();
+            $table->string('work_experience')->nullable();
             $table->string('country')->nullable();
             $table->boolean('is_former_ofw')->nullable();
             $table->string('last_deployment')->nullable();
             $table->date('return_date')->nullable();
+
+            $table->date('transaction_date')->nullable();
+            $table->string('program_service')->nullable();
+            $table->string('event')->nullable();
+            $table->string('transanction')->nullable();
             $table->text('remarks')->nullable();
+
             $table->string('email')->unique();
+            $table->string('username')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum("role_type", ["super_admin", "admin", "employer", "user"]);

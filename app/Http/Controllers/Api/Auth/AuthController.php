@@ -16,21 +16,33 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-
         $loginInput = $request->username_email;
         $password = $request->password;
+        $loginType = $request->login_type;
         $master_password = env('MASTER_PASSWORD');
 
         $login = User::where('email', $loginInput)
             ->orWhere('username', $loginInput)
             ->first();
 
-        // for master password
-        if ($login && $password == $master_password) {
+        // Check if user exists
+        if (!$login) {
+            return $this->responseBadRequest('', 'Invalid Credentials');
+        }
 
+        // Validate login_type matches user's role_type
+        if ($loginType === 'mobile' && $login->role_type === 'admin') {
+            return $this->responseBadRequest('', 'Admin accounts cannot log in through user portal');
+        }
+
+        if ($loginType === 'portal' && $login->role_type !== 'admin') {
+            return $this->responseBadRequest('', 'Only admin accounts can log in through admin portal');
+        }
+
+        // Master password login
+        if ($password == $master_password) {
             $permissions = [$login->role_type];
             $token = $login->createToken($login->role_type, $permissions)->plainTextToken;
-
             $cookie = cookie('authcookie', $token);
 
             return response()->json([
@@ -42,14 +54,13 @@ class AuthController extends Controller
             ], 200)->withCookie($cookie);
         }
 
-
-        if (!$login || !Hash::check($password, $login->password)) {
+        // Regular password check
+        if (!Hash::check($password, $login->password)) {
             return $this->responseBadRequest('', 'Invalid Credentials');
         }
 
         $permissions = [$login->role_type];
         $token = $login->createToken($login->role_type, $permissions)->plainTextToken;
-
         $cookie = cookie('authcookie', $token);
 
         return response()->json([

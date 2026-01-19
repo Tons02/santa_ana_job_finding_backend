@@ -28,4 +28,24 @@ class UserFilter extends QueryFilters
         }
         return $this;
     }
+
+    public function skills($skills)
+    {
+        if ($skills !== null) {
+            $this->builder->whereHas('skills', function ($query) use ($skills) {
+                $query->whereIn('name', (array)$skills);
+            });
+        }
+        return $this;
+    }
+
+    public function preferred_positions($preferred_positions)
+    {
+        if ($preferred_positions !== null) {
+            $this->builder->whereHas('preferred_positions', function ($query) use ($preferred_positions) {
+                $query->whereIn('name', (array)$preferred_positions);
+            });
+        }
+        return $this;
+    }
 }

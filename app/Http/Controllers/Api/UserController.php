@@ -10,6 +10,7 @@ use App\Http\Requests\UserSingleGetDisplayRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserUpdateResumeRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Course;
 use App\Models\User;
 use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class UserController extends Controller
         $status = $request->query('status');
         $pagination = $request->query('pagination');
 
-        $User = User::with('skills')->when($status === "inactive", function ($query) {
+        $User = User::with('skills', 'courses', 'preferred_positions')->when($status === "inactive", function ($query) {
             $query->onlyTrashed();
         })
             ->orderBy('created_at', 'desc')
@@ -62,9 +63,11 @@ class UserController extends Controller
             'height'  => $request->height,
             'religion'  => $request->religion,
             'full_address'  => $request->full_address,
+            'region'  => $request->region,
             'province'  => $request->province,
-            'lgu'  => $request->lgu,
+            'city_municipality'  => $request->city_municipality,
             'barangay'  => $request->barangay,
+            'street_address'  => $request->street_address,
             'username'  => $request->username,
             'email'  => $request->email,
             'password'  => $request->username,
@@ -150,45 +153,72 @@ class UserController extends Controller
                 'suffix'  => $request->suffix,
                 'date_of_birth'  => $request->date_of_birth,
                 'gender'  => $request->gender,
-                'landline'  => $request->landline,
-                'mobile_number' => $request->mobile_number,
                 'civil_status'  => $request->civil_status,
+                'region'  => $request->region,
+                'province'  => $request->province,
+                'city_municipality'  => $request->city_municipality,
+                'barangay'  => $request->barangay,
+                'street_address'  => $request->street_address,
+                'telephone'  => $request->telephone,
+                'mobile_number'  => $request->mobile_number,
                 'height'  => $request->height,
                 'religion'  => $request->religion,
-                'resume'  => $request->file('resume')->store('applicant_resume', 'private'),
-                'full_address'  => $request->full_address,
-                'province'  => $request->province,
-                'lgu'  => $request->lgu,
-                'barangay'  => $request->barangay,
+                'resume'  => $request->resume,
                 'employment_status'  => $request->employment_status,
                 'employment_type'  => $request->employment_type,
                 'months_looking'  => $request->months_looking,
+                'is_4ps'  => $request->is_4ps,
+                'is_pwd'  => $request->is_pwd,
+                'disability'  => $request->disability,
                 'is_ofw'  => $request->is_ofw,
+                'work_experience'  => $request->work_experience,
                 'is_former_ofw'  => $request->is_former_ofw,
+                'country'  => $request->country,
                 'last_deployment'  => $request->last_deployment,
                 'return_date'  => $request->return_date,
-                'username'  => $request->username,
+                'transaction_date'  => $request->transaction_date,
+                'program_service'  => $request->program_service,
+                'event'  => $request->event,
+                'transaction'  => $request->transaction,
+                'remarks'  => $request->remarks,
                 'email'  => $request->email,
+                'username'  => $request->username,
                 'password'  => $request->password,
                 'role_type'  => 'user',
             ]);
 
-            // Sync skills if provided
             if ($request->has('skills') && is_array($request->skills)) {
                 $user_registration->skills()->sync($request->skills);
             }
 
-            // Generate token for auto-login
+            if ($request->has('courses') && is_array($request->courses)) {
+                $courseIds = [];
+
+                foreach ($request->courses as $courseData) {
+                    $course = Course::firstOrCreate(
+                        ['name' => $courseData['name']],
+                        [
+                            'education_level' => $courseData['education_level'],
+                        ]
+                    );
+
+                    $courseIds[] = $course->id;
+                }
+
+                $user_registration->courses()->sync($courseIds);
+            }
+
+            if ($request->has('preferred_positions') && is_array($request->preferred_positions)) {
+                $user_registration->preferred_positions()->sync($request->preferred_positions);
+            }
+
             $permissions = [$user_registration->role_type];
             $token = $user_registration->createToken($user_registration->role_type, $permissions)->plainTextToken;
-
-            // Create auth cookie
             $cookie = cookie('authcookie', $token);
 
             DB::commit();
 
-            // Load skills relationship for response
-            $user_registration->load('skills');
+            $user_registration->load(['skills', 'courses', 'preferred_positions']);
 
             return response()->json([
                 'message' => 'User Registered Successfully',
@@ -198,7 +228,6 @@ class UserController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // Optionally delete the uploaded resume file if it was stored
             if (isset($user_registration) && $user_registration->resume) {
                 Storage::disk('private')->delete($user_registration->resume);
             }
@@ -215,38 +244,43 @@ class UserController extends Controller
         DB::beginTransaction();
 
         try {
-            $updateData = $request->only([
-                'first_name',
-                'middle_name',
-                'last_name',
-                'suffix',
-                'date_of_birth',
-                'gender',
-                'landline',
-                'mobile_number',
-                'civil_status',
-                'height',
-                'religion',
-                'full_address',
-                'province',
-                'lgu',
-                'barangay',
-                'employment_status',
-                'employment_type',
-                'months_looking',
-                'is_ofw',
-                'is_former_ofw',
-                'last_deployment',
-                'return_date',
-            ]);
-
-            // Handle resume upload if provided
-            if ($request->hasFile('resume')) {
-                if ($user->resume) {
-                    Storage::disk('private')->delete($user->resume);
-                }
-                $updateData['resume'] = $request->file('resume')->store('applicant_resume', 'private');
-            }
+            $updateData = [
+                'first_name'      => $request->first_name,
+                'middle_name'     => $request->middle_name,
+                'last_name'       => $request->last_name,
+                'suffix'          => $request->suffix,
+                'date_of_birth'   => $request->date_of_birth,
+                'gender'          => $request->gender,
+                'civil_status'    => $request->civil_status,
+                'region'          => $request->region,
+                'province'        => $request->province,
+                'city_municipality' => $request->city_municipality,
+                'barangay'        => $request->barangay,
+                'street_address'  => $request->street_address,
+                'telephone'       => $request->telephone,
+                'mobile_number'   => $request->mobile_number,
+                'height'          => $request->height,
+                'religion'        => $request->religion,
+                'employment_status' => $request->employment_status,
+                'employment_type' => $request->employment_type,
+                'months_looking'  => $request->months_looking,
+                'is_4ps'          => $request->is_4ps,
+                'is_pwd'          => $request->is_pwd,
+                'disability'      => $request->disability,
+                'is_ofw'          => $request->is_ofw,
+                'work_experience' => $request->work_experience,
+                'is_former_ofw'   => $request->is_former_ofw,
+                'country'         => $request->country,
+                'last_deployment' => $request->last_deployment,
+                'return_date'     => $request->return_date,
+                'transanction_date'     => $request->transanction_date,
+                'program_service'     => $request->program_service,
+                'event'     => $request->event,
+                'transaction' => $request->transaction,
+                'remarks'         => $request->remarks,
+                'email'           => $request->email,
+                'username'        => $request->username,
+            ];
 
             // Update user basic information
             $user->update($updateData);
@@ -256,21 +290,40 @@ class UserController extends Controller
                 $user->skills()->sync($request->skills);
             }
 
+            // Sync courses if provided
+            if ($request->has('courses') && is_array($request->courses)) {
+                $courseIds = [];
+
+                foreach ($request->courses as $courseData) {
+                    $course = Course::firstOrCreate(
+                        ['name' => $courseData['name']],
+                        [
+                            'education_level' => $courseData['education_level'],
+                        ]
+                    );
+
+                    $courseIds[] = $course->id;
+                }
+
+                $user->courses()->sync($courseIds);
+            }
+
+            // Sync preferred positions if provided
+            if ($request->has('preferred_positions') && is_array($request->preferred_positions)) {
+                $user->preferred_positions()->sync($request->preferred_positions);
+            }
+
             DB::commit();
 
-            // Load skills relationship for response
-            $user->load('skills');
+            // Load relationships for response
+            $user->load(['skills', 'courses', 'preferred_positions']);
 
             return response()->json([
                 'message' => 'User information updated successfully',
-                'data' => $user->fresh(['skills'])
+                'data' => $user
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-
-            if (isset($updateData['resume'])) {
-                Storage::disk('private')->delete($updateData['resume']);
-            }
 
             return response()->json([
                 'message' => 'User update failed',

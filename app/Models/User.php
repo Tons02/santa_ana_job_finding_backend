@@ -28,28 +28,35 @@ class User extends Authenticatable
         'suffix',
         'date_of_birth',
         'gender',
-        'landline',
-        'mobile_number',
         'civil_status',
+        'region',
+        'province',
+        'city_municipality',
+        'barangay',
+        'street_address',
+        'telephone',
+        'mobile_number',
         'height',
         'religion',
         'resume',
-        'full_address',
-        'province',
-        'lgu',
-        'barangay',
         'employment_status',
         'employment_type',
         'months_looking',
+        'is_4ps',
+        'is_pwd',
+        'disability',
         'is_ofw',
+        'work_experience',
         'is_former_ofw',
+        'country',
         'last_deployment',
         'return_date',
+        'program_service',
+        'remarks',
         'email',
         'username',
         'password',
-        'return_date',
-        'role_type',
+        'role_type'
     ];
 
     /**
@@ -84,6 +91,26 @@ class User extends Authenticatable
             'user_skills',
             'user_id',
             'skill_id'
+        )->withTimestamps();
+    }
+
+    public function preferred_positions()
+    {
+        return $this->belongsToMany(
+            PreferredPosition::class,
+            'user_preferred_positions',
+            'user_id',
+            'preferred_position_id'
+        )->withTimestamps();
+    }
+
+    public function courses()
+    {
+        return $this->belongsToMany(
+            Course::class,
+            'user_courses',
+            'user_id',
+            'course_id'
         )->withTimestamps();
     }
 }

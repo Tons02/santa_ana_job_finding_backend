@@ -25,11 +25,11 @@ return new class extends Migration
             $table->string('location')->nullable();
             $table->boolean('is_remote')->default(false);
             $table->enum('employment_type', ['full_time', 'part_time', 'contract', 'intership'])->default('full_time')->nullable();
-            $table->string('experience_level')->nullable(); 
+            $table->string('experience_level')->nullable();
             $table->unsignedInteger('salary_min')->nullable();
             $table->unsignedInteger('salary_max')->nullable();
             $table->string('salary_currency', 3)->default('PHP');
-            $table->enum('salary_period', ['yearly', 'monthly', 'weekly', 'hourly','semi_monthly'])->default('semi_monthly')->nullable();
+            $table->enum('salary_period', ['yearly', 'monthly', 'weekly', 'hourly', 'semi_monthly'])->default('semi_monthly')->nullable();
 
             $table->enum('hiring_status', ['active', 'closed', 'paused'])->default('active')->nullable();
             $table->timestamp('posted_at')->useCurrent();
@@ -40,7 +40,7 @@ return new class extends Migration
 
             $table->index('title');
             $table->index('location');
-            $table->index('status');
+            $table->index('hiring_status');
             $table->index('employment_type');
             $table->index('posted_at');
         });
