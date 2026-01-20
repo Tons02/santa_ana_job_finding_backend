@@ -9,6 +9,7 @@ class UserFilter extends QueryFilters
     protected array $allowedFilters = [];
 
     protected array $columnSearch = [
+        'full_name',
         'first_name',
         'last_name',
         'email',
@@ -16,7 +17,7 @@ class UserFilter extends QueryFilters
         'mobile_number',
         'full_address',
         'province',
-        'lgu',
+        'region',
         'barangay',
         'username'
     ];
@@ -31,21 +32,36 @@ class UserFilter extends QueryFilters
 
     public function skills($skills)
     {
-        if ($skills !== null) {
-            $this->builder->whereHas('skills', function ($query) use ($skills) {
-                $query->whereIn('name', (array)$skills);
+        if (!empty($skills)) {
+
+            $skillsArray = array_map(
+                'trim',
+                explode(',', $skills)
+            );
+
+            $this->builder->whereHas('skills', function ($query) use ($skillsArray) {
+                $query->whereIn('name', $skillsArray);
             });
         }
+
         return $this;
     }
 
+
     public function preferred_positions($preferred_positions)
     {
-        if ($preferred_positions !== null) {
-            $this->builder->whereHas('preferred_positions', function ($query) use ($preferred_positions) {
-                $query->whereIn('name', (array)$preferred_positions);
+        if (!empty($preferred_positions)) {
+
+            $positions = array_map(
+                'trim',
+                explode(',', $preferred_positions)
+            );
+
+            $this->builder->whereHas('preferred_positions', function ($query) use ($positions) {
+                $query->whereIn('name', $positions);
             });
         }
+
         return $this;
     }
 }

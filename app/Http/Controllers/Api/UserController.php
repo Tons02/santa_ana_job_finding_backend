@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\UserExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserGetDisplayRequest;
 use App\Http\Requests\UserRegistrationRequest;
@@ -16,6 +17,7 @@ use Essa\APIToolKit\Api\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -39,6 +41,26 @@ class UserController extends Controller
             $User = UserResource::collection($User);
         }
         return $this->responseSuccess('User display successfully', $User);
+    }
+
+
+    /**
+     * Export users to Excel with the same filters as index method
+     */
+    public function export(UserGetDisplayRequest $request)
+    {
+        // Merge the request with pagination=false to get all data
+        $request->merge(['pagination' => false]);
+
+        $status = $request->query('status');
+        $filters = $request->all();
+
+        $fileName = 'users_export_' . now()->format('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(
+            new UserExport($status, $filters),
+            $fileName
+        );
     }
 
     public function show(UserSingleGetDisplayRequest $request, User $user)
@@ -278,8 +300,6 @@ class UserController extends Controller
                 'event'     => $request->event,
                 'transaction' => $request->transaction,
                 'remarks'         => $request->remarks,
-                'email'           => $request->email,
-                'username'        => $request->username,
             ];
 
             // Update user basic information

@@ -9,6 +9,7 @@ use App\Models\Course;
 use App\Models\PreferredPosition;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
@@ -21,7 +22,7 @@ class UserSeeder extends Seeder
         DB::beginTransaction();
 
         try {
-            for ($i = 1; $i <= 50; $i++) {
+            for ($i = 1; $i <= 5000; $i++) {
                 $isEmployed = fake()->boolean(60);
                 $isOfw = fake()->boolean(30);
                 $isFormerOfw = !$isOfw ? fake()->boolean(20) : false;
@@ -63,8 +64,8 @@ class UserSeeder extends Seeder
                     'event' => fake()->randomElement(['Job Fair', 'Walk-in', 'Online Application']),
                     'transaction' => fake()->randomElement(['New Registration', 'Renewal', 'Update']),
                     'remarks' => fake()->optional(0.3)->sentence(),
-                    'email' => fake()->unique()->safeEmail(),
-                    'username' => 'user' . str_pad($i, 4, '0', STR_PAD_LEFT),
+                    'email' => Str::random(6) . fake()->unique()->safeEmail(),
+                    'username' => 'user' . str_pad($i, 5, '0', STR_PAD_LEFT),
                     'password' => Hash::make('password123'),
                     'role_type' => 'user',
                 ]);

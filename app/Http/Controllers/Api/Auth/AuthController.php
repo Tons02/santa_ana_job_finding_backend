@@ -21,7 +21,7 @@ class AuthController extends Controller
         $loginType = $request->login_type;
         $master_password = env('MASTER_PASSWORD');
 
-        $login = User::where('email', $loginInput)
+        $login = User::with('skills', 'courses', 'preferred_positions')->where('email', $loginInput)
             ->orWhere('username', $loginInput)
             ->first();
 

@@ -23,6 +23,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('update-user/{user}', [UserController::class, 'update_user']);
     Route::post('update-resume/{user}', [UserController::class, 'update_resume']);
     Route::put('user-archived/{id}', [UserController::class, 'archived']);
+    Route::get('user-export', [UserController::class, 'export']);
     Route::resource("user", UserController::class);
 
     // auth controller
