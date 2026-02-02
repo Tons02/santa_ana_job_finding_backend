@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -168,6 +169,23 @@ class UserController extends Controller
         DB::beginTransaction();
 
         try {
+            // Handle resume file upload and renaming
+            $resumePath = null;
+            if ($request->hasFile('resume')) {
+                $file = $request->file('resume');
+                $extension = $file->getClientOriginalExtension();
+
+                // Create filename: LastName_FirstName_YYYYMMDD.ext
+                $date = date('dmY'); // Current date in DMYYYY format
+                $code = Str::random(4);
+                $lastName = str_replace(' ', '_', $request->last_name);
+                $firstName = str_replace(' ', '_', $request->first_name);
+                $filename = "{$lastName}_{$firstName}_{$date}_{$code}.{$extension}";
+
+                // Store the file with the new name
+                $resumePath = $file->storeAs('applicant_resume', $filename, 'private');
+            }
+
             $user_registration = User::create([
                 'first_name'      => $request->first_name,
                 'middle_name' => $request->middle_name,
@@ -185,7 +203,7 @@ class UserController extends Controller
                 'mobile_number'  => $request->mobile_number,
                 'height'  => $request->height,
                 'religion'  => $request->religion,
-                'resume'  => $request->resume,
+                'resume'  => $resumePath, // Store the path instead of request value
                 'employment_status'  => $request->employment_status,
                 'employment_type'  => $request->employment_type,
                 'months_looking'  => $request->months_looking,
@@ -250,8 +268,8 @@ class UserController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            if (isset($user_registration) && $user_registration->resume) {
-                Storage::disk('private')->delete($user_registration->resume);
+            if (isset($resumePath) && $resumePath) {
+                Storage::disk('private')->delete($resumePath);
             }
 
             return response()->json([
@@ -353,13 +371,24 @@ class UserController extends Controller
 
     public function update_resume(UserUpdateResumeRequest $request, User $user)
     {
-
+        // Delete old resume if exists
         if ($user->resume) {
             Storage::disk('private')->delete($user->resume);
         }
 
-        // Store new resume
-        $path = $request->file('resume')->store('applicant_resume', 'private');
+        // Handle new resume file upload with naming convention
+        $file = $request->file('resume');
+        $extension = $file->getClientOriginalExtension();
+
+        // Create filename: LastName_FirstName_DMYYYY_CODE.ext
+        $date = date('dmY');
+        $code = Str::random(4);
+        $lastName = str_replace(' ', '_', $user->last_name);
+        $firstName = str_replace(' ', '_', $user->first_name);
+        $filename = "{$lastName}_{$firstName}_{$date}_{$code}.{$extension}";
+
+        // Store the file with the new name
+        $path = $file->storeAs('applicant_resume', $filename, 'private');
 
         // Update user record
         $user->update(['resume' => $path]);
