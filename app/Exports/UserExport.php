@@ -46,7 +46,10 @@ class UserExport implements FromCollection, WithHeadings, WithMapping, WithColum
     {
         if ($user->date_of_birth) {
             $diff = Carbon::parse($user->date_of_birth)->diff(now());
-            $age = "{$diff->y} years {$diff->m} months";
+            $age = $diff->y . ' years';
+            if ($diff->m > 0) {
+                $age .= ' ' . $diff->m . ' months';
+            }
         } else {
             $age = null;
         }
