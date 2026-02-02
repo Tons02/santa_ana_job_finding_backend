@@ -335,12 +335,11 @@ class UserController extends Controller
 
             DB::commit();
 
-            // Load relationships for response
-            $user->load(['skills', 'courses', 'preferred_positions']);
-
             return response()->json([
                 'message' => 'User information updated successfully',
-                'data' => $user
+                'data' => new UserResource(
+                    $user->load(['skills', 'courses', 'preferred_positions'])
+                ),
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
