@@ -21,7 +21,12 @@ class JobApplicationController extends Controller
         $status = $request->query('status');
         $pagination = $request->query('pagination');
 
-        $JobApplications = JobApplication::with('job', 'user')
+        $JobApplications = JobApplication::with(
+            'job',
+            'user.skills',
+            'user.courses',
+            'user.preferred_positions'
+        )
             ->when($status === "inactive", function ($query) {
                 $query->onlyTrashed();
             })

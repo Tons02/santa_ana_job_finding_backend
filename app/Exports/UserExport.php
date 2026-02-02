@@ -58,6 +58,35 @@ class UserExport implements FromCollection, WithHeadings, WithMapping, WithColum
         $updatedAtFormatted = $user->updated_at
             ? Carbon::parse($user->updated_at)->format('m/d/Y g:i:s A')
             : null;
+
+        $religion = match ($user->religion) {
+            'roman_catholic' => 'Roman Catholic',
+            'islam' => 'Islam',
+            'iglesia_ni_cristo' => 'Iglesia ni Cristo',
+            'born_again' => 'Born Again',
+            'baptist' => 'Baptist',
+            'seventh_day_adventist' => 'Seventh Day Adventist',
+            default => $user->religion
+        };
+
+        $employment_status = match ($user->employment_status) {
+            'employed' => 'Employed',
+            'unemployed' => 'Unemployed',
+            'self_employed' => 'Self Employed',
+            default => $user->employment_status
+        };
+
+        $employment_type = match ($user->employment_type) {
+            'full_time' => 'Full Time',
+            'part_time' => 'Part Time',
+            'self_employed' => 'Self Employed',
+            'freelance' => 'Freelance',
+            'contract' => 'Contract',
+            'internship' => 'Internship',
+            'wage' => 'Wage',
+            default => $user->employment_type
+        };
+
         return [
             'SANTA ANA (PAMPANGA)',
             'Municipality',
@@ -79,11 +108,11 @@ class UserExport implements FromCollection, WithHeadings, WithMapping, WithColum
             $user->barangay,
             $user->street_address,
             $user->telephone,
-            "'" . $user->mobile_number,
+            ' ' . $user->mobile_number,
             $user->height,
-            $user->religion,
-            $user->employment_status,
-            $user->employment_type,
+            $religion,
+            $employment_status,
+            $employment_type,
             $user->months_looking,
             $user->is_4ps ? 'Yes' : 'No',
             $user->is_pwd ? 'Yes' : 'No',
@@ -196,10 +225,10 @@ class UserExport implements FromCollection, WithHeadings, WithMapping, WithColum
             'U' => 17,
             'V' => 10,
             'W' => 23,
-            'X' => 15,
-            'Y' => 20,
-            'Z' => 10,
-            'AA' => 10,
+            'X' => 20,
+            'Y' => 22,
+            'Z' => 17,
+            'AA' => 15,
             'AB' => 10,
             'AC' => 20,
             'AD' => 10,
@@ -208,8 +237,8 @@ class UserExport implements FromCollection, WithHeadings, WithMapping, WithColum
             'AG' => 15,
             'AH' => 20,
             'AI' => 25,
-            'AJ' => 15,
-            'AK' => 15,
+            'AJ' => 17,
+            'AK' => 17,
             'AL' => 30,
             'AM' => 30,
             'AN' => 30,
@@ -219,8 +248,8 @@ class UserExport implements FromCollection, WithHeadings, WithMapping, WithColum
             'AR' => 100,
             'AS' => 100,
             'AT' => 100,
-            'AU' => 20,
-            'AV' => 20,
+            'AU' => 22,
+            'AV' => 22,
         ];
     }
 

@@ -46,7 +46,7 @@ class UserRegistrationRequest extends FormRequest
             'civil_status' => ['required', Rule::in(['single', 'married', 'widowed', 'separated'])],
             'region' => ['required', 'string', Rule::in(['REGION 3 (CENTRAL LUZON)'])],
             'province' => ['required', 'string', Rule::in(['PAMPANGA'])],
-            'city_municipality' => ['required', 'string', Rule::in(['SANTA ANA, PAMPANGA'])],
+            'city_municipality' => ['required', 'string', Rule::in(['SANTA ANA'])],
             'barangay' => ['required', 'string', 'max:100'],
             'street_address' => ['required', 'string', 'max:255'],
             'height' => ['nullable', 'numeric', 'min:50', 'max:300'],

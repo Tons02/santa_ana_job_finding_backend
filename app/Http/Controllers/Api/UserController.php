@@ -365,6 +365,8 @@ class UserController extends Controller
         // Update user record
         $user->update(['resume' => $path]);
 
+        $user->load(['skills', 'courses', 'preferred_positions']);
+
         return $this->responseSuccess('Resume updated successfully', $user);
     }
 

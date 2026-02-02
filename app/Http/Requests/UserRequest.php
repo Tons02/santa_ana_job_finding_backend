@@ -33,18 +33,15 @@ class UserRequest extends FormRequest
                 'before_or_equal:' . now()->subYears(18)->toDateString(),
             ],
             'gender' => ['required', Rule::in(['male', 'female'])],
-
             'landline' => ['nullable', 'string', 'max:50'],
             'civil_status' => ['required', Rule::in(['single', 'married', 'widowed', 'separated'])],
             'height' => ['nullable', 'numeric', 'min:50', 'max:300'],
             'religion' => ['nullable', 'string', 'max:255'],
-
             'region' => ['required', 'string', Rule::in(['REGION 3 (CENTRAL LUZON)'])],
             'province' => ['required', 'string', Rule::in(['PAMPANGA'])],
-            'city_municipality' => ['required', 'string', Rule::in(['SANTA ANA, PAMPANGA'])],
+            'city_municipality' => ['required', 'string', Rule::in(['SANTA ANA'])],
             'barangay' => ['required', 'string', 'max:100'],
             'street_address' => ['required', 'string', 'max:255'],
-
             'username' => [
                 'required',
                 'string',
@@ -61,7 +58,6 @@ class UserRequest extends FormRequest
                     ? "unique:users,email," . $this->route()->user
                     : "unique:users,email"
             ],
-
             // Skills (optional)
             'skills' => ['nullable', 'array'],
             'skills.*' => ['integer', 'exists:skills,id'],

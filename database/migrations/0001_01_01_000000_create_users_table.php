@@ -26,8 +26,7 @@ return new class extends Migration
             $table->string('city_municipality');
             $table->string('barangay');
             $table->string('street_address');
-            $table->text('full_address')->virtualAs("CONCAT(street_address, ', ', barangay, ', ', city_municipality, ', ', province, ', ', region)");
-            $table->string('telephone')->nullable();
+            $table->text('full_address')->virtualAs("CONCAT(region, ', ', province, ', ', city_municipality, ', ', barangay, ', ', street_address)");
             $table->string('mobile_number')->nullable();
             $table->string('height');
             $table->string('religion');

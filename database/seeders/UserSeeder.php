@@ -39,7 +39,7 @@ class UserSeeder extends Seeder
                     'civil_status' => fake()->randomElement(['single', 'married', 'widowed', 'separated']),
                     'region' => 'REGION 3 (CENTRAL LUZON)',
                     'province' => 'PAMPANGA',
-                    'city_municipality' => 'SANTA ANA, PAMPANGA',
+                    'city_municipality' => 'SANTA ANA',
                     'barangay' => fake()->randomElement(['San Agustin', 'San Bartolome', 'San Isidro', 'San Joaquin', 'San Jose']),
                     'street_address' => fake()->streetAddress(),
                     'telephone' => fake()->optional(0.4)->numerify('(045) ###-####'),
